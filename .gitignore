@@ -1,0 +1,5 @@
+pb/**/*
+authsvc
+apisvc
+.env
+.vscode
