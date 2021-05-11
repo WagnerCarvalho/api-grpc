@@ -32,7 +32,7 @@ func (r *userRepository) Save(user *models.User) error {
 }
 
 func (r *userRepository) GetById(id string) (user *models.User, err error) {
-	err = r.c.FindId(bson.ObjectId(id)).One(&user)
+	err = r.c.FindId(bson.ObjectIdHex(id)).One(&user)
 	return
 }
 
