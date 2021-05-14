@@ -19,6 +19,16 @@ func init() {
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	cfg := db.NewConfig()
+	conn, err := db.NewConnection(cfg)
+	defer conn.Close()
+
+	r := NewUsersRepository(conn)
+	r.(*userRepository).DeleteAll()
+	if err != nil {
+		log.Panicln(err)
+	}
 }
 
 func getUser(id bson.ObjectId) *models.User {
@@ -115,4 +125,29 @@ func TestUsersRepositoryDeleteId(t *testing.T) {
 
 	_, err = r.GetById(user.Id.Hex())
 	assert.EqualError(t, mgo.ErrNotFound, err.Error())
+}
+
+func TestUsersRepositoryUpdate(t *testing.T) {
+	cfg := db.NewConfig()
+	conn, err := db.NewConnection(cfg)
+	assert.NoError(t, err)
+
+	_id := bson.NewObjectId()
+	user := getUser(_id)
+
+	r := NewUsersRepository(conn)
+	err = r.Save(user)
+	assert.NoError(t, err)
+
+	found, err := r.GetById(_id.Hex())
+	assert.Equal(t, found.Name, "TEST")
+
+	userUpdate := getUser(_id)
+	userUpdate.Name = "TEST-2"
+
+	err = r.Update(userUpdate)
+	assert.NoError(t, err)
+
+	found, err = r.GetById(_id.Hex())
+	assert.Equal(t, found.Name, "TEST-2")
 }

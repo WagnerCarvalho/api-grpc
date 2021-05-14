@@ -47,9 +47,13 @@ func (r *userRepository) GetAll() (users []*models.User, err error) {
 }
 
 func (r *userRepository) Update(user *models.User) error {
-	return r.c.Update(user.Id, user)
+	return r.c.UpdateId(user.Id, user)
 }
 
 func (r *userRepository) Delete(id string) error {
 	return r.c.RemoveId(bson.ObjectIdHex(id))
+}
+
+func (r *userRepository) DeleteAll() error {
+	return r.c.DropCollection()
 }
