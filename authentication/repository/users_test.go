@@ -151,3 +151,25 @@ func TestUsersRepositoryUpdate(t *testing.T) {
 	found, err = r.GetById(_id.Hex())
 	assert.Equal(t, found.Name, "TEST-2")
 }
+
+func TestUsersRepositoryGetAll(t *testing.T) {
+	cfg := db.NewConfig()
+	conn, err := db.NewConnection(cfg)
+	assert.NoError(t, err)
+
+	r := NewUsersRepository(conn)
+	user := getUser(bson.NewObjectId())
+
+	err = r.Save(user)
+	assert.NoError(t, err)
+
+	items, err := r.GetAll()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, items)
+
+	err = r.Delete(user.Id.Hex())
+	assert.NoError(t, err)
+
+	_, err = r.GetById(user.Id.Hex())
+	assert.EqualError(t, mgo.ErrNotFound, err.Error())
+}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -101,6 +102,7 @@ func (h *authHandlers) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandlers) GetUsers(w http.ResponseWriter, r *http.Request) {
+	log.Println("Start GetUsers")
 	stream, err := h.authSvcClient.ListUsers(r.Context(), &pb.ListUserRequest{})
 	if err != nil {
 		restutils.WriteError(w, http.StatusBadRequest, err)

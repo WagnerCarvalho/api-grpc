@@ -3,6 +3,7 @@ package validators
 import (
 	"api-grpc/pb"
 	"errors"
+	"strings"
 
 	"gopkg.in/mgo.v2/bson"
 )
@@ -34,4 +35,8 @@ func ValidateSignUp(user *pb.User) error {
 	}
 
 	return nil
+}
+
+func NormalizeEmail(email string) string {
+	return strings.TrimSpace(strings.ToLower(email))
 }
