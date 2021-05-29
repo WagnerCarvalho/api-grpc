@@ -9,9 +9,10 @@ import (
 )
 
 type Route struct {
-	Method  string
-	Path    string
-	Handler http.HandlerFunc
+	Method       string
+	Path         string
+	Handler      http.HandlerFunc
+	AuthRequired bool
 }
 
 func Install(router *mux.Router, routeList []*Route) {

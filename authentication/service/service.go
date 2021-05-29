@@ -5,7 +5,9 @@ import (
 	"api-grpc/authentication/repository"
 	"api-grpc/authentication/validators"
 	"api-grpc/pb"
+	"api-grpc/security"
 	"context"
+	"log"
 	"strings"
 	"time"
 
@@ -21,14 +23,46 @@ func NewAuthService(userRepository repository.UserRepository) pb.AuthServiceServ
 	return &authService{userRepository: userRepository}
 }
 
+func (s *authService) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
+
+	req.Email = validators.NormalizeEmail(req.Email)
+
+	user, err := s.userRepository.GetByEmail(req.Email)
+	if err != nil {
+		log.Println("signin failed:", err.Error())
+		return nil, validators.ErrSignInFailed
+	}
+
+	err = security.VerifyPassword(user.Password, req.Password)
+	if err != nil {
+		log.Println("signin failed:", err.Error())
+		return nil, validators.ErrSignInFailed
+	}
+
+	token, err := security.NewToken(user.Id.Hex())
+	if err != nil {
+		log.Println("signin failed:", err.Error())
+		return nil, validators.ErrSignInFailed
+	}
+
+	return &pb.SignInResponse{User: user.ToProtoBuffer(), Token: token}, nil
+}
+
 func (s *authService) SignUp(ctx context.Context, req *pb.User) (*pb.User, error) {
 
 	err := validators.ValidateSignUp(req)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Password, err = security.EncryptPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	req.Name = strings.TrimSpace(req.Name)
 	req.Email = validators.NormalizeEmail(req.Email)
+
 	found, err := s.userRepository.GetByEmail(req.Email)
 	if err == mgo.ErrNotFound {
 		user := new(models.User)

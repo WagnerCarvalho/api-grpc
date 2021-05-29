@@ -16,6 +16,7 @@ import (
 
 type AuthHandlers interface {
 	SignUp(w http.ResponseWriter, r *http.Request)
+	SignIn(w http.ResponseWriter, r *http.Request)
 	PutUser(w http.ResponseWriter, r *http.Request)
 	GetUser(w http.ResponseWriter, r *http.Request)
 	GetUsers(w http.ResponseWriter, r *http.Request)
@@ -28,6 +29,34 @@ type authHandlers struct {
 
 func NewAuthHandlers(authSvcClient pb.AuthServiceClient) AuthHandlers {
 	return &authHandlers{authSvcClient: authSvcClient}
+}
+
+func (h *authHandlers) SignIn(w http.ResponseWriter, r *http.Request) {
+	if r.Body == nil {
+		restutils.WriteError(w, http.StatusBadRequest, restutils.ErrEmptyBody)
+		return
+	}
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	input := new(pb.SignInRequest)
+	err = json.Unmarshal(body, input)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := h.authSvcClient.SignIn(r.Context(), input)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	restutils.WriteAsJson(w, http.StatusOK, resp)
 }
 
 func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
