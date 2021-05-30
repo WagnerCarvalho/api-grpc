@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -91,6 +90,13 @@ func (h *authHandlers) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandlers) PutUser(w http.ResponseWriter, r *http.Request) {
+
+	tokenPayload, err := restutils.AuthRequestWithId(r)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
 	if r.Body == nil {
 		restutils.WriteError(w, http.StatusBadRequest, restutils.ErrEmptyBody)
 		return
@@ -108,8 +114,8 @@ func (h *authHandlers) PutUser(w http.ResponseWriter, r *http.Request) {
 		restutils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	vars := mux.Vars(r)
-	user.Id = vars["id"]
+
+	user.Id = tokenPayload.UserId
 	resp, err := h.authSvcClient.UpdateUser(r.Context(), user)
 	if err != nil {
 		restutils.WriteError(w, http.StatusBadRequest, err)
@@ -120,8 +126,13 @@ func (h *authHandlers) PutUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandlers) GetUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	resp, err := h.authSvcClient.GetUser(r.Context(), &pb.GetUserRequest{Id: vars["id"]})
+	tokenPayload, err := restutils.AuthRequestWithId(r)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := h.authSvcClient.GetUser(r.Context(), &pb.GetUserRequest{Id: tokenPayload.UserId})
 	if err != nil {
 		restutils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -155,8 +166,12 @@ func (h *authHandlers) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	resp, err := h.authSvcClient.DeleteUser(r.Context(), &pb.GetUserRequest{Id: vars["id"]})
+	tokenPayload, err := restutils.AuthRequestWithId(r)
+	if err != nil {
+		restutils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	resp, err := h.authSvcClient.DeleteUser(r.Context(), &pb.GetUserRequest{Id: tokenPayload.UserId})
 	if err != nil {
 		restutils.WriteError(w, http.StatusBadRequest, err)
 		return

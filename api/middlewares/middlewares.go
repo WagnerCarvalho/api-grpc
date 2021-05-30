@@ -2,9 +2,9 @@ package middlewares
 
 import (
 	"api-grpc/api/restutils"
+	"api-grpc/security"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -18,11 +18,26 @@ func LogRequest(next http.HandlerFunc) http.HandlerFunc {
 
 func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		header := strings.TrimSpace(r.Header.Get("Authorization"))
-		splitred := strings.Split(header, " ")
-		if len(splitred) != 2 {
+		tokenString, err := security.ExtractToken(r)
+		if err != nil {
 			restutils.WriteError(w, http.StatusUnauthorized, restutils.ErrUnauthorized)
+			return
 		}
+
+		token, err := security.ParseToken(tokenString)
+		if err != nil {
+			log.Println("Error on parsed token:", err.Error())
+			restutils.WriteError(w, http.StatusUnauthorized, restutils.ErrUnauthorized)
+			return
+		}
+
+		if !token.Valid {
+			log.Println("Token invalid", tokenString)
+			restutils.WriteError(w, http.StatusUnauthorized, restutils.ErrUnauthorized)
+			return
+		}
+
+		next(w, r)
+
 	}
 }

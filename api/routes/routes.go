@@ -17,7 +17,11 @@ type Route struct {
 
 func Install(router *mux.Router, routeList []*Route) {
 	for _, route := range routeList {
-		router.HandleFunc(route.Path, middlewares.LogRequest(route.Handler)).Methods(route.Method)
+		if route.AuthRequired {
+			router.HandleFunc(route.Path, middlewares.LogRequest(middlewares.Authenticate(route.Handler))).Methods(route.Method)
+		} else {
+			router.HandleFunc(route.Path, middlewares.LogRequest(route.Handler)).Methods(route.Method)
+		}
 	}
 }
 

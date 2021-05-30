@@ -1,9 +1,12 @@
 package restutils
 
 import (
+	"api-grpc/security"
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -27,4 +30,23 @@ func WriteError(w http.ResponseWriter, statusCode int, err error) {
 		e = err.Error()
 	}
 	WriteAsJson(w, statusCode, JError{Error: e})
+}
+
+func AuthRequestWithId(r *http.Request) (*security.TokenPayload, error) {
+	token, err := security.ExtractToken(r)
+	if err != nil {
+		return nil, err
+	}
+
+	payload, err := security.NewTokenPayload(token)
+	if err != nil {
+		return nil, err
+	}
+
+	vars := mux.Vars(r)
+	if payload.UserId != vars["id"] {
+		return nil, ErrUnauthorized
+	}
+
+	return payload, nil
 }
