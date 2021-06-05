@@ -12,7 +12,7 @@ rm $TMPFILE
 
 # Create mongodb service with mongod stateful-set
 # TODO: Temporarily added no-valudate due to k8s 1.8 bug: https://github.com/kubernetes/kubernetes/issues/53309
-kubectl delete -f ../mongodb/resources/mongo-namespace.yaml
-kubectl apply -f ../mongodb/resources/mongo-namespace.yaml --validate=false
+kubectl delete -f ../namespace/resources/mongo-namespace.yaml
+kubectl apply -f ../namespace/resources/mongo-namespace.yaml --validate=false
 kubectl get namespace
 sleep 3

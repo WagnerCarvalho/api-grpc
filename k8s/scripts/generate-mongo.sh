@@ -32,18 +32,3 @@ sleep 3
 
 kubectl get all - n mongo-grpc | grep mongo
 sleep 3
-
-minikube addons enable ingress
-kubectl get pods -n kube-system
-sleep 3
-
-kubectl apply -f ../mongodb/resources/mongo-ingress.yaml
-kubectl get ingress -n mongo-grpc
-sleep 3
-
-# Print current deployment state (unlikely to be finished yet)
-# kubectl get all 
-# kubectl get persistentvolumes
-echo
-echo "Keep running the following command until all 'mongod-n' pods are shown as running:  kubectl get all"
-echo

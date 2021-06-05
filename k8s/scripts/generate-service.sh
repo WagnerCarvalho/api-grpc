@@ -27,3 +27,8 @@ kubectl delete -f ../services/resources/authentication.yaml
 kubectl apply -f ../services/resources/authentication.yaml
 kubectl get pods -n mongo-grpc
 sleep 3
+
+kubectl delete -f ../services/resources/api.yaml
+kubectl apply -f ../services/resources/api.yaml
+kubectl get pods -n mongo-grpc
+sleep 3
