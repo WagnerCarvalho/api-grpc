@@ -23,7 +23,7 @@ spec:
         command:
           - sh
           - -c
-          - /app/apisvc -auth_addr=$auth_addr
+          - /app/apisvc -authaddr=$auth_addr
         env:
           - name: auth_addr
             value: auth-service:9001

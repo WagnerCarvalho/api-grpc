@@ -1,5 +1,7 @@
 pb/**/*
 authsvc
 apisvc
+authsvc-local
+apisvc-local
 .env
 .vscode
