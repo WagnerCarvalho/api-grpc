@@ -1,0 +1,1 @@
+mongo --eval "db.auth('$MONGO_INITDB_ROOT_USERNAME', '$MONGO_INITDB_ROOT_PASSWORD'); db = db.getSiblingDB('api_grpc'); db.createUser({ user: 'user', pwd: 'password', roles: [{ role: 'readWrite', db: 'api_grpc' }, { role: 'dbAdmin', db: 'api_grpc'}] });"

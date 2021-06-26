@@ -4,6 +4,6 @@ metadata:
   name: svc-configs
   namespace: mongo-grpc
 data:
-  db_host: 172.17.0.5
+  db_host: mongodb-service
   db_port: "27017"
   db_name: api_grpc
